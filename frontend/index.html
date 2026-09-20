@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomous Ops/Dev Agent - Control Center (Agent Canvas + SWE-agent)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Navigation Bar -->
+    <header class="top-navbar">
+      <div class="brand-section">
+        <div class="brand-logo">AG</div>
+        <div class="brand-meta">
+          <h1>Autonomous Ops/Dev Agent</h1>
+          <p>Multi-Agent Engineering Platform &middot; OpenHands &amp; SWE-agent Architecture</p>
+        </div>
+      </div>
+
+      <div class="top-telemetry">
+        <div class="telemetry-item">
+          <span>Agent:</span>
+          <span class="telemetry-val" id="telemetry-agent" style="color: var(--accent-cyan);">Idle</span>
+        </div>
+        <div class="telemetry-item">
+          <span>Confidence:</span>
+          <span class="telemetry-val" id="telemetry-confidence" style="color: var(--accent-emerald);">98.0%</span>
+        </div>
+        <div class="telemetry-item">
+          <span>Retries:</span>
+          <span class="telemetry-val" id="telemetry-retries">0 / 2</span>
+        </div>
+        <div class="live-badge" id="live-indicator">
+          <span class="live-pulse"></span>
+          <span id="live-text">Live Connected</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Split Screen -->
+    <main class="main-workspace">
+      
+      <!-- LEFT SIDEBAR: Multi-Agent Trajectory & Task Dispatcher -->
+      <aside class="agent-sidebar">
+        
+        <!-- Persona Status Bar -->
+        <div class="agent-status-bar">
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-dim);">AGENTS</span>
+          <div class="agent-chips">
+            <span class="agent-chip chip-architect" id="chip-architect">Architect</span>
+            <span class="agent-chip chip-coder" id="chip-coder">Coder</span>
+            <span class="agent-chip chip-tester" id="chip-tester">Tester</span>
+            <span class="agent-chip chip-critic" id="chip-critic">Critic</span>
+            <span class="agent-chip chip-escalation" id="chip-escalation">Safety</span>
+          </div>
+        </div>
+
+        <!-- Task Dispatcher -->
+        <div class="task-dispatcher">
+          <div class="dispatcher-header">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">DISPATCH DEV TASK / ISSUE</span>
+            <span style="font-size: 0.7rem; color: var(--accent-indigo);" id="task-status-tag">Ready</span>
+          </div>
+
+          <!-- Presets -->
+          <div class="preset-pills">
+            <button class="preset-pill" data-task="Build a simple Python REST API using FastAPI that manages a todo list. Include CRUD endpoints with Pydantic validation and unit tests.">FastAPI Todo API</button>
+            <button class="preset-pill" data-task="Implement secure JWT user authentication middleware with bcrypt password hashing, token validation, and rate limiting.">JWT Auth</button>
+            <button class="preset-pill" data-task="Build a URL shortener API with FastAPI that generates short codes, redirects, and tracks click counts with tests.">URL Shortener</button>
+            <button class="preset-pill" data-task="Create a Python CLI calculator with add, subtract, multiply, divide operations, input validation, and unit tests.">Calculator CLI</button>
+          </div>
+
+          <!-- Input Textarea -->
+          <textarea id="task-input" class="task-textarea" placeholder="Describe a task or paste a GitHub issue (e.g., Build a REST API for a todo app with FastAPI)..."></textarea>
+
+          <div class="task-submit-row">
+            <span style="font-size: 0.72rem; color: var(--text-dim);" id="task-subtext">Runs Planner &rarr; Coder &rarr; Guardrails &rarr; Sandbox &rarr; Critic</span>
+            <button id="btn-run-pipeline" class="btn-dispatch">
+              <span>🚀</span> Launch Pipeline
+            </button>
+          </div>
+        </div>
+
+        <!-- Trajectory / Thought Stream -->
+        <div class="trajectory-stream" id="trajectory-stream">
+          <div class="trajectory-card">
+            <div class="card-header">
+              <span class="agent-badge-label" style="color: var(--accent-indigo);">
+                <span>🏛️</span> System Initialized
+              </span>
+              <span class="card-meta-time">Ready</span>
+            </div>
+            <div class="card-body">
+              Autonomous Ops/Dev Agent ready. Multi-agent state machine loaded with live guardrails, isolated sandbox execution, and real-time telemetry.
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT DEVELOPER WORKBENCH -->
+      <section class="developer-workbench">
+        
+        <!-- Workbench Tab Navigation -->
+        <nav class="workbench-tabs">
+          <button class="workbench-tab active" data-target="pane-editor" id="tab-editor">
+            <span>📁</span> Code &amp; Files
+          </button>
+          <button class="workbench-tab" data-target="pane-terminal" id="tab-terminal">
+            <span>🖥️</span> Sandbox Terminal
+          </button>
+          <button class="workbench-tab" data-target="pane-diff" id="tab-diff">
+            <span>🔍</span> Git Diff &amp; PR
+          </button>
+          <button class="workbench-tab" data-target="pane-guardrails" id="tab-guardrails">
+            <span>🛡️</span> Guardrails Radar
+          </button>
+          <button class="workbench-tab" data-target="pane-tests" id="tab-tests">
+            <span>🧪</span> Test Reports
+          </button>
+        </nav>
+
+        <!-- Tab Content Area -->
+        <div class="tab-content-area">
+          
+          <!-- PANE 1: Code Editor & File Explorer (SWE-agent style) -->
+          <div class="tab-pane active" id="pane-editor">
+            <div class="code-editor-layout">
+              <!-- File Tree -->
+              <div class="file-tree-sidebar">
+                <div class="file-tree-header">Workspace Files</div>
+                <ul class="file-tree-list" id="file-tree-list">
+                  <li class="file-tree-item selected" data-filename="app/main.py">
+                    <span>📄</span> app/main.py
+                  </li>
+                  <li class="file-tree-item" data-filename="app/utils.py">
+                    <span>📄</span> app/utils.py
+                  </li>
+                  <li class="file-tree-item" data-filename="tests/test_main.py">
+                    <span>🧪</span> tests/test_main.py
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Code Viewer Panel -->
+              <div class="code-viewer-panel">
+                <div class="editor-header">
+                  <span id="editor-active-filename">app/main.py</span>
+                  <button id="btn-copy-code" style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-muted); border-radius: 4px; padding: 0.2rem 0.6rem; cursor: pointer; font-size: 0.72rem;">Copy Code</button>
+                </div>
+                <div class="editor-body" id="editor-code-container">
+                  <!-- Code lines will be populated here -->
+                  <div class="code-line"><span class="line-num">1</span><span class="line-code"><span style="color: #c678dd;">from</span> fastapi <span style="color: #c678dd;">import</span> FastAPI, HTTPException</span></div>
+                  <div class="code-line"><span class="line-num">2</span><span class="line-code"><span style="color: #c678dd;">from</span> pydantic <span style="color: #c678dd;">import</span> BaseModel</span></div>
+                  <div class="code-line"><span class="line-num">3</span><span class="line-code"></span></div>
+                  <div class="code-line"><span class="line-num">4</span><span class="line-code">app = FastAPI(title=<span style="color: #98c379;">"Autonomous DevOps Service"</span>)</span></div>
+                  <div class="code-line"><span class="line-num">5</span><span class="line-code"></span></div>
+                  <div class="code-line"><span class="line-num">6</span><span class="line-code"><span style="color: #e5c07b;">@app.get</span>(<span style="color: #98c379;">"/"</span>)</span></div>
+                  <div class="code-line"><span class="line-num">7</span><span class="line-code"><span style="color: #61afef;">def</span> <span style="color: #61afef;">root</span>():</span></div>
+                  <div class="code-line"><span class="line-num">8</span><span class="line-code">    <span style="color: #c678dd;">return</span> {<span style="color: #98c379;">"status"</span>: <span style="color: #98c379;">"active"</span>, <span style="color: #98c379;">"service"</span>: <span style="color: #98c379;">"DevOps-Agent"</span>}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE 2: Sandbox Terminal -->
+          <div class="tab-pane" id="pane-terminal">
+            <div class="terminal-layout">
+              <div class="terminal-toolbar">
+                <span>SANDBOX EXECUTION STREAM (DOCKER / CONFINED PROCESS)</span>
+                <span id="term-exit-status">Status: READY</span>
+              </div>
+              <div class="terminal-screen" id="terminal-screen">
+                <div class="term-line info">[SYSTEM] Isolated execution sandbox initialized.</div>
+                <div class="term-line info">[SYSTEM] Working directory: ./workspace_runs/</div>
+                <div class="term-line info">[SYSTEM] Timeout policy: 60s per execution step.</div>
+                <div class="term-line cmd">$ pytest -v --tb=short</div>
+                <div class="term-line success">tests/test_main.py::test_sanitize_input PASSED [ 50%]</div>
+                <div class="term-line success">tests/test_main.py::test_calculate_metric PASSED [100%]</div>
+                <div class="term-line success">======================== 2 passed in 0.45s ========================</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE 3: Git Diff & Pull Request (SWE-agent style) -->
+          <div class="tab-pane" id="pane-diff">
+            <div class="diff-layout">
+              <div class="diff-header">
+                <div>
+                  <h3 style="font-size: 0.95rem; font-weight: 700;">Git Branch &amp; Unified Diff</h3>
+                  <p style="font-size: 0.75rem; color: var(--text-dim);" id="diff-branch-name">Branch: devops-fix/task-1</p>
+                </div>
+                <div>
+                  <span class="live-badge" id="pr-status-badge">PR Ready: #42</span>
+                </div>
+              </div>
+              <div class="diff-container" id="diff-container">
+                <div class="diff-line diff-info">diff --git a/app/main.py b/app/main.py</div>
+                <div class="diff-line diff-info">--- a/app/main.py</div>
+                <div class="diff-line diff-info">+++ b/app/main.py</div>
+                <div class="diff-line diff-add">+ from fastapi import FastAPI, HTTPException</div>
+                <div class="diff-line diff-add">+ from pydantic import BaseModel</div>
+                <div class="diff-line diff-add">+ app = FastAPI(title="Generated DevOps Service")</div>
+                <div class="diff-line diff-add">+ @app.get("/items/{item_id}")</div>
+                <div class="diff-line diff-add">+ def get_item(item_id: int):</div>
+                <div class="diff-line diff-add">+     return {"id": item_id, "status": "verified"}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE 4: Guardrails & Safety Radar -->
+          <div class="tab-pane" id="pane-guardrails">
+            <div class="guardrails-layout">
+              <div class="guardrail-cards-grid">
+                <!-- Prompt Injection Defense -->
+                <div class="guard-card">
+                  <div class="guard-card-title">
+                    <span>🛡️</span> Prompt Injection Defense
+                  </div>
+                  <span class="guard-status-pill pill-pass" id="status-injection">ACTIVE &middot; PASSED</span>
+                  <p style="font-size: 0.78rem; color: var(--text-muted);">
+                    Monitors incoming issues and prompts for adversarial jailbreaks, DAN overrides, and directive bypasses.
+                  </p>
+                  <div style="font-size: 0.72rem; color: var(--text-dim);" id="guard-injection-details">
+                    Confidence: 98% &middot; 0 violations
+                  </div>
+                </div>
+
+                <!-- Command Firewall -->
+                <div class="guard-card">
+                  <div class="guard-card-title">
+                    <span>🔥</span> Command Firewall
+                  </div>
+                  <span class="guard-status-pill pill-pass" id="status-firewall">ACTIVE &middot; ENFORCING</span>
+                  <p style="font-size: 0.78rem; color: var(--text-muted);">
+                    Intercepts destructive shell commands (<code style="color:#f87171">rm -rf /</code>, <code style="color:#f87171">curl | bash</code>, reverse shells, format).
+                  </p>
+                  <div style="font-size: 0.72rem; color: var(--text-dim);" id="guard-firewall-details">
+                    Blocked 0 hazardous calls
+                  </div>
+                </div>
+
+                <!-- AST Security Scanner -->
+                <div class="guard-card">
+                  <div class="guard-card-title">
+                    <span>🔬</span> AST Security Scanner
+                  </div>
+                  <span class="guard-status-pill pill-pass" id="status-ast">ACTIVE &middot; SCANNING</span>
+                  <p style="font-size: 0.78rem; color: var(--text-muted);">
+                    Analyzes Python Abstract Syntax Trees for dangerous imports (<code style="color:#f87171">ctypes</code>, <code style="color:#f87171">pty</code>) and hardcoded credentials.
+                  </p>
+                  <div style="font-size: 0.72rem; color: var(--text-dim);" id="guard-ast-details">
+                    Clean syntax &middot; 0 secret leaks
+                  </div>
+                </div>
+              </div>
+
+              <!-- Escalation & Safety Policy -->
+              <div class="guard-card" style="border-color: rgba(99, 102, 241, 0.3);">
+                <div class="guard-card-title" style="color: var(--accent-indigo);">
+                  <span>⚡</span> Human Escalation Arbiter
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">
+                  If the confidence score drops below <strong>75%</strong>, or if the Critic Agent rejects code after <strong>2 self-correction cycles</strong>, the pipeline automatically halts and raises a human escalation alert to prevent deploying defective code.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE 5: Test Reports -->
+          <div class="tab-pane" id="pane-tests">
+            <div class="test-layout">
+              <div class="test-metric-bar">
+                <div class="test-box">
+                  <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase;">Tests Passed</span>
+                  <span style="font-size: 1.6rem; font-weight: 800; color: var(--accent-emerald);" id="test-passed-val">2</span>
+                </div>
+                <div class="test-box">
+                  <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase;">Tests Failed</span>
+                  <span style="font-size: 1.6rem; font-weight: 800; color: var(--accent-rose);" id="test-failed-val">0</span>
+                </div>
+                <div class="test-box">
+                  <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase;">Code Coverage</span>
+                  <span style="font-size: 1.6rem; font-weight: 800; color: var(--accent-indigo);" id="test-coverage-val">88%</span>
+                </div>
+                <div class="test-box">
+                  <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase;">Execution Duration</span>
+                  <span style="font-size: 1.6rem; font-weight: 800; color: var(--accent-amber);" id="test-duration-val">0.45s</span>
+                </div>
+              </div>
+
+              <div class="guard-card" style="flex: 1;">
+                <div class="guard-card-title">
+                  <span>📋</span> Detailed Pytest Runner Log
+                </div>
+                <pre style="background: var(--bg-input); padding: 1rem; border-radius: 8px; font-family: var(--font-mono); font-size: 0.8rem; color: #a7f3d0; overflow: auto; flex: 1;" id="test-full-output">
+platform win32 -- Python 3.9.13, pytest-8.4.2
+rootdir: /workspace/task_1
+collected 2 items
+
+tests/test_main.py::test_sanitize_input PASSED [ 50%]
+tests/test_main.py::test_calculate_metric PASSED [100%]
+
+======================== 2 passed in 0.45s ========================
+                </pre>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
