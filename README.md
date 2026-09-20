@@ -13,11 +13,6 @@
 
 **Autonomous Ops/Dev Agent with Real Guardrails** is a next-generation AI-driven DevOps automation platform capable of accepting software issues, planning solutions, generating production-grade code, executing automated test suites in isolated sandboxes, independently reviewing code quality, and self-correcting failures before deployment.
 
-It realizes the complete architectural blueprint specified in the academic synopsis (*Maharishi Markandeshwar University, 2026-27*) and synthesizes core design patterns from three state-of-the-art open-source software engineering repositories:
-1. **[SWE-agent](https://github.com/SWE-agent/SWE-agent)**: Agent-Computer Interface (ACI) for surgical code editing, file navigation, lint feedback, and Git patch/PR workflows.
-2. **[OpenHands](https://github.com/OpenHands/OpenHands)**: Event stream architecture, Docker container sandbox runtime, live WebSocket event broadcasting, and multi-layered guardrail interception.
-3. **[multi-agent-coder](https://github.com/sriram369/multi-agent-coder)**: LangGraph conditional state machine, typed Pydantic state, specialized Planner/Coder/Tester/Critic agent roles, and automated self-correction loop.
-
 ---
 
 ## 🏗️ 6-Layer Architecture
@@ -94,5 +89,3 @@ pytest tests/ -v
 
 ---
 
-## 📄 License
-MIT License.
